@@ -1,0 +1,11 @@
+Users:
+ 1. registration (email, password, API key)
+ 2. require API key for routes
+ 3. Add ability to make some texts public
+ 4. Track usage of API
+    -- hard cap at N for now?
+
+Landing page
+Signup page
+
+Setup Stripe

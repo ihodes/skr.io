@@ -6,8 +6,11 @@
                  [ring-json-response "0.2.0"]
                  [com.novemberain/monger "1.7.0-beta1"]
                  [ring.middleware.logger "0.4.0"]
-                 [environ "0.4.0"]]
+                 [environ "0.4.0"]
+                 [ring/ring-jetty-adapter "1.1.6"]]
   :plugins [[lein-ring "0.8.8"]
             [lein-environ "0.4.0"]]
+  :uberjar-name "skrio-standalone.jar"
   :ring {:handler skrio.core/app}
-  :env {:mongodb-url "mongodb://localhost/skrio"})
+  :env {:mongodb-url "mongodb://localhost/skrio"}
+  :min-lein-version "2.3.3")

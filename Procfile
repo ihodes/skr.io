@@ -1,0 +1,1 @@
+web: java $JVM_OPTS -cp target/skrio-standalone.jar clojure.main -m skrio.core $PORT

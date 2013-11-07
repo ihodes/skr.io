@@ -7,6 +7,7 @@
   (:require [compojure.handler :as handler]
             [compojure.route :as route]
             [ring.middleware.logger :as logger]
+            [ring.adapter.jetty :as jetty]
             [monger.core :as mg]
             [monger.collection :as mc]
             [clojure.set :as set]))
@@ -99,3 +100,6 @@
 
 
 (def app (logger/wrap-with-logger (wrap-json-response (handler/site skrio-routes))))
+
+(defn -main [port]
+  (jetty/run-jetty app {:port (Integer. port) :join? false}))
