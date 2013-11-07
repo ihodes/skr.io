@@ -1,11 +1,41 @@
-Users:
- 1. registration (email, password, API key)
- 2. require API key for routes
- 3. Add ability to make some texts public
- 4. Track usage of API
-    -- hard cap at N for now?
+# TODO
 
-Landing page
+
+Accept text/plain (e.g. the POST body is the text)
+Accept application/json
+
+Use multimethods (with the dispatch function looking at the mimetype in the req!)
+
+
 Signup page
+Documentation
 
+Track usage of API
 Setup Stripe
+
+Store metadata on texts
+  -- curl -X POST ... -dtext=asdasd -dmeta[mime-type]="application/json" -dmeta[foo]=bar
+
+Allow naming of files, expose them publically or privately (need to determine the UX for this)
+
+Map mime-types to responses
+
+e.g.
+
+content-type: text/plain                        -> text/plain
+              text/markdown                     -> text/html (with special styling for markdown)
+              text/html                         -> text/html (as-is)
+              application/json                  -> text/plain (pretty-printed JSON)
+              application/xml                   -> application/xml
+              application/source-clojure        -> text/html (with special styling for clojure)
+              application/source-X              -> text/html (with special styling for X)
+              application/x-www-form-urlencoded -> text/plain
+              *                                 -> text/plain
+
+
+allow for ?mime=<mime/type> to force display as a certain mimetype
+allow for ?plain url-param to force plaintext response (without pretty printing or anything)
+           -- shortcut for ?mime=text/plain
+
+
+Move to Postgres
