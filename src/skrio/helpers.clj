@@ -1,5 +1,5 @@
 (ns skrio.helpers
-  (:use [ring.util.response :only (status response content-type)])
+  (:use [ring.util.response :only (status response content-type header)])
   (:require [clojure.set :as set]
             [clojurewerkz.scrypt.core :as scrypt]
             [clojure.data.codec.base64 :as b64]))
