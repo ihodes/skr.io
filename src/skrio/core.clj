@@ -19,8 +19,8 @@
             [monger.collection :as mc]))
 
 
-(def config {:token-length  (env :skrio-token-length)
-             :max-text-size (env :skrio-max-text-size)
+(def config {:token-length  (Integer. (env :skrio-token-length))
+             :max-text-size (Integer. (env :skrio-max-text-size))
              :mongodb-url   (env :mongodb-url)})
 
 (mg/connect-via-uri! (:mongodb-url config))
