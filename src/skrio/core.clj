@@ -135,17 +135,18 @@
 ;;;;;;;;;;;;;;
 
 (defn- create-user
-  [{{:keys [email password]} :params} req]
-  (cond (< (count password) 8) (respond-json-400 "password must be 8+ chars")
-        (not (re-matches #".+@.+\..+" email)) (respond-json-400 "invalid email")
-        :else (let [oid (ObjectId.)
-                    [tok sec csrf] (repeatedly (gen-secret (:token-length config)))]
-                (try
-                  (mc/insert "users" {:_id oid :csrf-token csrf
-                                      :api-token tok :api-secret sec
-                                      :email email :password (encrypt password)})
-                  (respond 201 (str oid))
-                  (catch Exception e (respond-json-500))))))
+  [req]
+  (let [{{:keys [email password]} :params} req]
+    (cond (< (count password) 8) (respond-json-400 "password must be 8+ chars")
+          (not (re-matches #".+@.+\..+" email)) (respond-json-400 "invalid email")
+          :else (let [oid (ObjectId.)
+                      [tok sec csrf] (repeatedly #(gen-secret (:token-length config)))]
+                  (try
+                    (mc/insert "users" {:_id oid :csrf-token csrf
+                                        :api-token tok :api-secret sec
+                                        :email email :password (encrypt password)})
+                    (respond 201 (str oid))
+                    (catch Exception e (respond-json-500)))))))
 
 (defn- get-user
   [user-id req]
