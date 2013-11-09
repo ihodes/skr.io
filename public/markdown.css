@@ -1,0 +1,44 @@
+body { font-size: 20px;
+       font-family: "proxima-nova", Helvetica, sans-serif; 
+       max-width: 30em; margin: 0 auto;
+       overflow-x: hidden; word-wrap: break-word; }
+img { max-width: 100%; }
+ul, ol { padding: 0px; }
+li { padding-left: 12px; line-height: 1.6em; }
+
+time { color: #878787; font-family: Inconsolata; font-size: 0.9em; }
+p { color: rgb(15, 15, 15); line-height: 1.5em; }
+h1, h2, h3, h4 { font-weight: 700;}
+h1 { padding-top: 11px; }
+h2 { padding-top: 7px; }
+
+a { color: black; }
+a:hover { color: gold; }
+a:visited { color: purple; }
+a:visited:hover { color: gold; }
+
+{ margin: 20px 0 250px 0; padding: 0 27px; }
+blockquote { padding: 0.5em 2em; margin: 0; border-left: 10px solid gold; }
+h1 { font-size: 1.6em; margin-bottom: 0.1em; }
+h1 a { text-decoration: none; }
+h1 a:visited { color: black; }
+h1 a:visited:hover { color: gold; }
+p { hyphens: auto; -moz-hyphens: auto; -webkit-hyphens: auto;
+            text-align: justify; }
+p a { text-decoration: underline; }
+p strong { font-weight: 700; }
+img { padding: 1em 0; }
+hr { display: block; height: 3px;
+             border: 0; border-top: 3px dotted #ccc;
+             margin: 2em auto; padding: 0;
+             width: 2em; }
+
+code { font-family: Inconsolata, monospace;
+               -webkit-hyphens: none; -moz-hyphens: none; hyphens: none; }
+p > code { background: #f7f7f7; padding: 2px 7px; border: 1px solid #e7e7e7;
+                   -webkit-hyphens: none; -moz-hyphens: none; hyphens: none; }
+p a > code { background: #f7f7f7; padding: 2px 7px; border: 1px solid #e7e7e7;
+                     -webkit-hyphens: none; -moz-hyphens: none; hyphens: none; }
+pre { margin: 11px 0; padding: 19px 23px; background: #f7f7f7;
+              border-radius: 2px; -webkit-hyphens: none; }
+pre code { font-size: 0.7em; -webkit-hyphens: none; }

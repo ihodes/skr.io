@@ -19,8 +19,9 @@
             [monger.collection :as mc]))
 
 
-(def config {:token-length  (Integer. (env :skrio-token-length))
-             :max-text-size (Integer. (env :skrio-max-text-size))
+
+(def config {:token-length  (Integer. (str (env :skrio-token-length)))
+             :max-text-size (Integer. (str (env :skrio-max-text-size)))
              :mongodb-url   (env :mongodb-url)})
 
 (mg/connect-via-uri! (:mongodb-url config))
@@ -45,8 +46,7 @@
 (defn- create-text
   [req]
   (let [user (:user req)
-        oid  (ObjectId.)
-        wtf "why\nnot"]
+        oid  (ObjectId.)]
     (if (not user)
       (auth (respond-json-401))
       (try
@@ -54,8 +54,6 @@
           (if (> (count text) (:max-text-size config))
             (respond-json-413 (:text-length-error errors))
             (do
-              #_(mc/insert "texts" {:_id oid :user (:id user) :public false
-                                  :text text :content-type content-type})
               (mc/insert "texts" {:_id oid :text text :user (:id user)
                                   :public false :content-type content-type})
               (respond 201 (str-_id (mc/find-map-by-id "texts" oid))))))

@@ -20,6 +20,7 @@
                           :html    [identity "text/html"]}
 
    :application/json     {:default [identity "application/json"]
+                          :json    [identity "application/json"]
                           :txt     [identity "text/plain"]
                           :html    [(fn [text]
                                       (h/html [:html
@@ -28,6 +29,7 @@
                                     "text/html"]}
 
    :application/xml      {:default [identity "application/xml"]
+                          :xml     [identity "application/xml"]
                           :txt     [identity "text/plain"]
                           :html    [identity "text/html"]}
 
@@ -37,7 +39,13 @@
                                     "text/plain"]
                           :html    [(fn [text] 
                                       (h/html [:html
-                                               [:head [:title "Some Text"]]
+                                               [:head [:title "Markdown"]
+                                                [:link {:href "/public/normalize.css"
+                                                        :rel "stylesheet"} ]
+                                                [:link {:href "/public/markdown.css"
+                                                        :rel "stylesheet"} ]
+                                                [:link {:href "/public/syntax.css"
+                                                        :rel "stylesheet"} ]]
                                                [:body (md/md-to-html-string 
                                                        (str text \newline \newline))]]))
                                     "text/html"]}})
