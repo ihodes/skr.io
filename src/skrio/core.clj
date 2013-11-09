@@ -142,7 +142,9 @@
                     (mc/insert "users" {:_id oid :csrf-token csrf
                                         :api-token tok :api-secret sec
                                         :email email :password (encrypt password)})
-                    (respond 201 (str oid))
+                    (respond 201 {:id (str oid)
+                                  :api-token tok :api-secret sec
+                                  :email email})
                     (catch Exception e (respond-json-500)))))))
 
 (defn- get-user
