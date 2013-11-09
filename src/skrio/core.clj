@@ -2,70 +2,95 @@
   (:use compojure.core
         skrio.middleware
         skrio.helpers
-        skrio.post-processor
+        skrio.extractor
+        skrio.conversion
+        skrio.responses
         [environ.core :only (env)]
-        [ring.middleware.json-response :only (wrap-json-response)]
-        [ring.util.response :only (status response content-type)])
+        [ring.util.response :only (status response content-type header)])
   (:import  [org.bson.types ObjectId])
   (:require [skrio.pages :as pages]
+            [clojure.string :as cstring]
             [compojure.handler :as handler]
             [compojure.route :as route]
             [ring.middleware.logger :as logger]
+            [ring.middleware.json :as ring-json]
             [ring.adapter.jetty :as jetty]
             [monger.core :as mg]
-            [monger.collection :as mc]
-            [clojure.data.json :as json]))
+            [monger.collection :as mc]))
 
 
 (mg/connect-via-uri! (env :mongodb-url))
 
-(def config {:token-length 64 :max-text-size 32768})
 
+
+(def config {:token-length 64 :max-text-size 32768})
+(def errors
+  {:text-length-error (str "Text length must be " (:max-text-size config) " or less.")
+   :other "Error."})
+
+(def str-_id (comp str :_id))
+(defn auth
+  [resp]
+  (header resp "WWW-Authenticate" "Basic realm=\"texts\""))
 
 
 ;;;;;;;;;;;;;;;
 ;; Texts API ;;
 ;;;;;;;;;;;;;;;
 
+
 (defn- get-texts
   [req]
-  (response 
-   {:texts (let [user  (:user req)
-                 texts (mc/find-maps "texts" {:user (:id user)})]
+  (response
+   {:texts (let [texts (mc/find-maps "texts" {:user (get-in req [:user :id])})]
              (-> texts remove-users prepare-ids))}))
 
 (defn- create-text
   [req]
   (let [user (:user req)
-        oid (ObjectId.)
-        text (:text (:params req))
-        public (= "true" (:public (:params req)))]
-    (if (and user (<= (count text) (:max-text-size config)))
-      (do
-        (mc/insert "texts" {:_id oid :user (:id user) :public public :text text})
-        (try
-          (status (response (str (:_id (mc/find-map-by-id "texts" oid)))) 201)
-          (catch Exception e (status (response "Message Too Long") 400))))
-      access-denied)))
+        oid  (ObjectId.)
+        wtf "why\nnot"]
+    (if (not user)
+      (auth (respond-json-401))
+      (try
+        (let [{text :text content-type :content-type} (extract-text req)]
+          (if (> (count text) (:max-text-size config))
+            (respond-json-413 (:text-length-error errors))
+            (do
+              #_(mc/insert "texts" {:_id oid :user (:id user) :public false
+                                  :text text :content-type content-type})
+              (mc/insert "texts" {:_id oid :text text :user (:id user)
+                                  :public false :content-type content-type})
+              (respond 201 (str-_id (mc/find-map-by-id "texts" oid))))))
+        (catch Exception e (respond-json-400 (str (.getMessage e))))))))
 
+
+(defn- extract-id [s] (zipmap [:id :to] (cstring/split s #"\.")))
 (defn- get-text
   [text-id req]
-  (try 
-    (let [text (mc/find-map-by-id "texts" (ObjectId. text-id))
+  (try
+    (let [{text-id :id to :to :or {to "txt"}} (extract-id text-id)
+          text-o (mc/find-map-by-id "texts" (ObjectId. text-id))
           user (:user req)]
-      (if (can-access? user text)
-        (response (:text text))
-        (response (str req))))
-    (catch Exception e not-found)))
+      (cond
+       (not text-o)                    (respond-json-404)
+       (not (can-access? user text-o)) (auth (respond-json-401))
+       :else 
+       (try
+         (let [{text :text type :content-type} (convert text-o (keyword to))]
+           (content-type (response text) type))
+         (catch Exception e (respond-json-400)))))))
 
 (defn- get-public-text
   [text-id req]
   (try
-    (let [text (mc/find-one-as-map "texts" {:_id (ObjectId. text-id) :public true})]
+    (let [{text-id :id to :to :or {to "txt"}} (extract-id text-id)
+          text (mc/find-one-as-map "texts" {:_id (ObjectId. text-id) :public true})
+          {text :text type :content-type} (convert text (keyword to))]
       (if text
-        (response (:text text))
-        not-found))
-    (catch Exception e not-found)))
+        (content-type (response text) type)
+        (respond-json-404)))
+    (catch Exception e (respond-json-404))))
 
 (defn- update-text
   [text-id req]
@@ -80,7 +105,9 @@
   [text-id req]
   (try
     (if-let [user (:user req)]
-      (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)} {"$set" {:public true}}))
+      (mc/update "texts"
+                 {:_id (ObjectId. text-id) :user (:id user)}
+                 {"$set" {:public true}}))
     (catch Exception e))
   (response text-id))
 
@@ -88,7 +115,9 @@
   [text-id req]
   (try
     (if-let [user (:user req)]
-      (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)} {"$set" {:public false}}))
+      (mc/update "texts"
+                 {:_id (ObjectId. text-id) :user (:id user)}
+                 {"$set" {:public false}}))
     (catch Exception e))
   (response text-id))
 
@@ -106,23 +135,17 @@
 ;;;;;;;;;;;;;;
 
 (defn- create-user
-  [req]
-  (let [params     (:params req)
-        email      (:email params)
-        password   (:password params)]
-    (cond (< (count password) 8) (status (response "password must be 8+ chars") 400)
-          (not (re-matches #".+@.+\..+" email)) (status (response "invalid email") 400)
-          :else (let [oid        (ObjectId.)
-                      api-token  (gen-secret (:token-length config))
-                      api-secret (gen-secret (:token-length config))
-                      csrf-token (gen-secret (:token-length config))]
-                  (mc/insert "users" {:_id oid :csrf-token csrf-token
-                                      :api-token api-token :api-secret api-secret
+  [{{:keys [email password]} :params} req]
+  (cond (< (count password) 8) (respond-json-400 "password must be 8+ chars")
+        (not (re-matches #".+@.+\..+" email)) (respond-json-400 "invalid email")
+        :else (let [oid (ObjectId.)
+                    [tok sec csrf] (repeatedly (gen-secret (:token-length config)))]
+                (try
+                  (mc/insert "users" {:_id oid :csrf-token csrf
+                                      :api-token tok :api-secret sec
                                       :email email :password (encrypt password)})
-                  (try
-                    (status (response (str (:_id (mc/find-map-by-id "users" oid)))) 201)
-                    (catch Exception e (status (response "We're really sorry! Something is broken.")
-                                               500)))))))
+                  (respond 201 (str oid))
+                  (catch Exception e (respond-json-500))))))
 
 (defn- get-user
   [user-id req]
@@ -130,8 +153,8 @@
     (try
       (response (dissoc (prepare-id (mc/find-map-by-id "users" (ObjectId. user-id)))
                         :password :csrf-token))
-      (catch Exception e (status (response "Not Found") 404)))
-    (status (response "Not Found") 404)))
+      (catch Exception e (respond-json-404)))
+    (respond-json-404)))
 
 (defn- delete-user ;; not hooked up
   [user-id req]
@@ -153,16 +176,16 @@
 
 
 (defroutes user-api
-  (context "/api/v.1/user" []
-    (POST "/" [] create-user))
-  (context "/api/v.1/user/:user-id" [user-id]
+  (context  "/api/v.1/user" []
+    (POST   "/" [] create-user))
+  (context  "/api/v.1/user/:user-id" [user-id]
     (GET    "/" [] (partial get-user user-id)))) 
 
 (defroutes text-api
-  (context "/api/v.1/text" []
-    (GET  "/" [] get-texts)
-    (POST "/" [] create-text))
-  (context "/api/v.1/text/:text-id" [text-id]
+  (context  "/api/v.1/text" []
+    (GET    "/"        [] get-texts)
+    (POST   "/"        [] create-text))
+  (context  "/api/v.1/text/:text-id" [text-id]
     (GET    "/"        [] (partial get-text text-id))
     (PUT    "/"        [] (partial update-text text-id))
     (POST   "/private" [] (partial make-text-private text-id))
@@ -177,13 +200,14 @@
   user-api
   public-texts
   web
-  (route/not-found "Not Found"))
+  (route/not-found (respond-json-404)))
 
 (def app (-> skrio-routes
              (make-wrap-user #(mc/find-one-as-map "users" {:api-token %}))
              wrap-basic-auth
              logger/wrap-with-logger
-             wrap-json-response
+             ring-json/wrap-json-response
+             wrap-utf-8
              handler/site))
 
 

@@ -1,13 +1,16 @@
 (ns skrio.helpers
   (:use [ring.util.response :only (status response content-type)])
-  (:require[clojure.set :as set]
+  (:require [clojure.set :as set]
             [clojurewerkz.scrypt.core :as scrypt]
             [clojure.data.codec.base64 :as b64]))
+
+
 
 (defn str->base64-str [s]
   (String. (b64/encode (.getBytes s)) "UTF-8"))
 (defn base64-str->str [s]
   (String. (b64/decode (.getBytes s)) "UTF-8"))
+
 
 (defn can-access? [user obj]
   (and user obj (= (:id user) (:user obj))))
@@ -37,6 +40,7 @@
         int->str (comp str char)
         rand-stream (repeatedly #(+ 32 (rand-int 95)))]
     (apply str (take n (filter secret-char? (map int->str rand-stream))))))
+
 
 (defn encrypt [pw] (scrypt/encrypt pw (Math/pow 2 16) 8 1))
 (defn verify [plain-pw encrypted-pw] (scrypt/verify plain-pw encrypted-pw))

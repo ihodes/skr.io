@@ -2,7 +2,8 @@
   (:use skrio.helpers
         [clojure.string :only (split)]
         [clojure.set :only (rename-keys)]
-        [clojure.data.codec.base64 :only (encode decode)]))
+        [clojure.data.codec.base64 :only (encode decode)]
+        [ring.util.response :only (charset)]))
 
 (defn make-wrap-user
   [handler lookup]
@@ -23,3 +24,9 @@
           auth-map    (when auth-text (into {} (map vector [:user :pass]
                                                     (split auth-text #":"))))]
       (handler (assoc request :auth auth-map)))))
+
+(defn wrap-utf-8
+  [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (charset response "utf-8"))))
