@@ -1,6 +1,6 @@
 # Skr.io: Text In, Text Out
 
-Skr.io is a web API for text. With it, you can store text, and retrieve them at unique URLs. Text may be published (accessible without an API token), as well as changed, and transformed. Skr.io intelligently stores text based on the content-type it is POSTed with, and can display it, depending on the format, in a variety of ways.
+Skr.io is a web API for text. With it, you can store texts, and retrieve them at a unique URLs. Text may be published (accessible without an API token), as well as changed, and transformed. Skr.io intelligently stores text based on the content-type it is POSTed with, and can display it, depending on the format, in a variety of ways.
 
 ## Authentication and URL
 
@@ -8,7 +8,10 @@ Authentication is done via basic auth; a token and secret will be provided to yo
 
 The base URL for all API requests is
 
-    https://<token>:<secret>@api.skr.io/api/v.1/
+    WILL BE: https://<token>:<secret>@api.skr.io/api/v.1/
+    CURRENTLY: http://<token>:<secret>@skrio.herokuapp.com/api/v.1/
+
+NB the scheme is http currently.
 
 ## Errors
 
@@ -70,7 +73,8 @@ If an `ext` is included, a transformation will optionally be done on the text, d
 
 Below is a mapping of the text object's `content-type` + an `ext` to the resulting response. If an invalid `ext` is attempted, a 400 error will be returned. If no `ext` is listed, the default transformation is applied (listed below).
 
-1. `*` with `.txt` -> Text content is returned, "Content-type: text/plain"
+1. `*`
+  - `.ext` = `.txt` -> Text content is returned, "Content-type: text/plain"
 2. `text/plain`
   - `.ext` = `.default` -> Text content is returned, "Content-type: text/plain"
   - `.ext` = `.html` -> Nicely formatted HTML with text is returned, "Content-type: text/html"
