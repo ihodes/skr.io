@@ -1,6 +1,6 @@
-body { font-size: 20px;
+body { font-size: 14px;
        font-family: "proxima-nova", Helvetica, sans-serif; 
-       max-width: 30em; margin: 0 auto;
+       max-width: 40em; margin: 0 auto;
        overflow-x: hidden; word-wrap: break-word; }
 img { max-width: 100%; }
 ul, ol { padding: 0px; }
@@ -8,7 +8,7 @@ li { padding-left: 12px; line-height: 1.6em; }
 
 time { color: #878787; font-family: Inconsolata; font-size: 0.9em; }
 p { color: rgb(15, 15, 15); line-height: 1.5em; }
-h1, h2, h3, h4 { font-weight: 700;}
+h1, h2, h3, h4 { font-weight: 700; margin-top: 2.2em;}
 h1 { padding-top: 11px; }
 h2 { padding-top: 7px; }
 
@@ -19,7 +19,7 @@ a:visited:hover { color: gold; }
 
 { margin: 20px 0 250px 0; padding: 0 27px; }
 blockquote { padding: 0.5em 2em; margin: 0; border-left: 10px solid gold; }
-h1 { font-size: 1.6em; margin-bottom: 0.1em; }
+h1 { font-size: 2.5em; margin-bottom: 0.1em; }
 h1 a { text-decoration: none; }
 h1 a:visited { color: black; }
 h1 a:visited:hover { color: gold; }
