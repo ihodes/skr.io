@@ -44,3 +44,9 @@
 
 (defn encrypt [pw] (scrypt/encrypt pw (Math/pow 2 16) 8 1))
 (defn verify [plain-pw encrypted-pw] (scrypt/verify plain-pw encrypted-pw))
+
+
+(def str-_id (comp str :_id))
+(defn auth
+  [resp]
+  (header resp "WWW-Authenticate" "Basic realm=\"texts\""))

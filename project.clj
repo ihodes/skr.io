@@ -18,5 +18,7 @@
             [lein-environ "0.4.0"]]
   :uberjar-name "skrio-standalone.jar"
   :ring {:handler skrio.core/app}
-  :env {:mongodb-url "mongodb://localhost/skrio"}
+  :env {:mongodb-url "mongodb://localhost/skrio"
+        :skrio-token-length 2
+        :skrio-max-text-size 32768}
   :min-lein-version "2.3.3")

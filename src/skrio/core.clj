@@ -19,19 +19,16 @@
             [monger.collection :as mc]))
 
 
-(mg/connect-via-uri! (env :mongodb-url))
+(def config {:token-length  (env :skrio-token-length)
+             :max-text-size (env :skrio-max-text-size)
+             :mongodb-url   (env :mongodb-url)})
+
+(mg/connect-via-uri! (:mongodb-url config))
 
 
-
-(def config {:token-length 64 :max-text-size 32768})
 (def errors
   {:text-length-error (str "Text length must be " (:max-text-size config) " or less.")
    :other "Error."})
-
-(def str-_id (comp str :_id))
-(defn auth
-  [resp]
-  (header resp "WWW-Authenticate" "Basic realm=\"texts\""))
 
 
 ;;;;;;;;;;;;;;;
