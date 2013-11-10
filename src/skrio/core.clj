@@ -15,6 +15,7 @@
             [ring.middleware.logger :as logger]
             [ring.middleware.json :as ring-json]
             [ring.adapter.jetty :as jetty]
+            [clojure.data.json :as json]
             [monger.core :as mg]
             [monger.collection :as mc]))
 
@@ -36,13 +37,13 @@
 ;; Texts API ;;
 ;;;;;;;;;;;;;;;
 
-
 (defn- get-texts
   [req]
   (response
    {:texts (let [texts (mc/find-maps "texts" {:user (get-in req [:user :id])})]
-             (-> texts remove-users prepare-ids))}))
+             (-> texts remove-users prepare-ids truncate-text))}))
 
+(defn- -text-meta [] {:name "<untitled>" :created-on (.getTime (java.util.Date.))})
 (defn- create-text
   [req]
   (let [user (:user req)
@@ -55,7 +56,8 @@
             (respond-json-413 (:text-length-error errors))
             (do
               (mc/insert "texts" {:_id oid :text text :user (:id user)
-                                  :public false :content-type content-type})
+                                  :public false :content-type content-type
+                                  :metadata (-text-meta)})
               (respond 201 (str-_id (mc/find-map-by-id "texts" oid))))))
         (catch Exception e (respond-json-400 (str (.getMessage e))))))))
 
@@ -124,6 +126,45 @@
     (catch Exception e))
   (response text-id))
 
+(defn- get-text-metadata
+  [text-id req]
+  (let [user (:user req)
+        text-o (mc/find-map-by-id "texts" (ObjectId. text-id))]
+    (try
+      (if (can-access? user text-o)
+        (respond (:metadata text-o))
+        (respond-json-404))
+      (catch Exception e (respond-json-500)))))
+
+(defn- modify-text-metadata
+  [text-id req]
+  (try
+    (let [t       (slurp (:body req))
+          metadata (json/read-str t :key-fn (comp keyword (partial str "metadata.")))
+          user (:user req)
+          text-o (mc/find-map-by-id "texts" (ObjectId. text-id))]
+      (if (can-access? user text-o)
+        (do
+          (println (str metadata))
+          (mc/update "texts" {:_id (ObjectId. text-id)} {"$set" metadata})
+          (response (:metadata (mc/find-map-by-id "texts" (ObjectId. text-id)))))
+        (respond-json-404)))
+    (catch Exception e (respond-json-400 "JSON is malformed."))))
+
+(defn- remove-text-metadata
+  [text-id req]
+  (let [keyname (get-in req [:params :keyname])
+        user    (:user req)
+        text-o  (mc/find-map-by-id "texts" (ObjectId. text-id))]
+    (try
+      (if (can-access? user text-o)
+        (do
+          (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)}
+                     {"$unset" {(str "metadata." keyname) ""}})
+          (respond {:msg (str "\"" keyname "\" was removed")}))
+        (respond-json-404))
+      (catch Exception e (respond-json-500)))))
+
 
 ;;;;;;;;;;;;;;
 ;; User API ;;
@@ -188,6 +229,9 @@
     (PUT    "/"        [] (partial update-text text-id))
     (POST   "/private" [] (partial make-text-private text-id))
     (POST   "/public"  [] (partial make-text-public text-id))
+    (GET    "/meta"    [] (partial get-text-metadata    text-id))
+    (POST   "/meta"    [] (partial modify-text-metadata text-id))
+    (DELETE "/meta"    [] (partial remove-text-metadata text-id))
     (DELETE "/"        [] (partial delete-text text-id))))
 
 (defroutes public-texts
@@ -205,8 +249,8 @@
              wrap-basic-auth
              logger/wrap-with-logger
              ring-json/wrap-json-response
-             wrap-utf-8
-             handler/site))
+             wrap-append-newline
+             wrap-utf-8))
 
 
 ;;;;;;;;;;;;;;;;;;;;;

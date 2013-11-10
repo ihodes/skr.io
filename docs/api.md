@@ -8,10 +8,10 @@ Authentication is done via basic auth; a token and secret will be provided to yo
 
 The base URL for all API requests is
 
-    WILL BE: https://<token>:<secret>@api.skr.io/api/v.1/
-    CURRENTLY: http://<token>:<secret>@skrio.herokuapp.com/api/v.1/
+    http://<token>:<secret>@skrio.herokuapp.com/api/v.1/
 
-NB the scheme is http currently.
+(This will become <https://api.skr.io/> soon...)
+
 
 ## Errors
 
@@ -65,7 +65,7 @@ NB: Currently the max size of a text object which can be uploaded is 2^15 charac
 
 ### Get Text
 
-You may **get** a text, returning the UUID of the text:
+You may **get** a text, returning the text:
 
     curl .../text/<text-id>[.ext]?
 
@@ -93,6 +93,14 @@ Below is a mapping of the text object's `content-type` + an `ext` to the resulti
   - `.ext` = `.render` -> Rendered Markdown HTML is returned, "Content-type: text/plain"
 
 ### Get Public Text
+
+Anyone (no authentication required) may **get** a *public* text, returning the text:
+
+    curl http://skr.io/text/<text-id>[.ext]?
+
+The same `.ext` rules as above apply here.
+
+NB: The URL here is different.
 
 
 ### Update Text
@@ -125,3 +133,29 @@ You may **privatize** a text, making the text no longer available to the public,
     curl -X POST .../text/<text-id>/private
 
 
+### Get Metadata for Text
+
+You may get the **metadata** of a text:
+
+    curl .../text/<text-id>/meta
+
+This returns a JSON object with default values for `"name"` ("untitled") and `"created-on"` (<epoch time text was created on>), plus any additional values which can be added.
+
+
+### Set Metadata for Text
+
+You may set the **metadata** of a text:
+
+    curl -X POST .../text/<text-id>/meta -d"<JSON>"
+
+The JSON object should include only the keys and values which should be updated; existing key-vals will remain in the metadata as-is.
+
+NB: The `Content-type` header is not required here; skr.io will assume that the `content-type` is `application/json` and ignore the header.
+
+### Remove Metadata for Text
+
+You may remove **metadata** of a text:
+
+    curl -X DELETE .../text/<text-id>/meta -dkeyname="<name>"
+
+Removes the key/value of any key in the metadata with name `name`.

@@ -30,3 +30,10 @@
   (fn [request]
     (let [response (handler request)]
       (charset response "utf-8"))))
+
+
+(defn wrap-append-newline
+  [handler]
+  (fn [request]
+    (let [response (handler request)]
+      (update-in response [:body] #(str % \newline)))))

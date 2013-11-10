@@ -42,7 +42,7 @@
 
 (defmethod extract-text "text/plain"
   [req]
-  {:text (slurp (:body req)) :content-type "text/plai"})
+  {:text (slurp (:body req)) :content-type "text/plain"})
 
 (defmethod extract-text "text/html"
   [req]

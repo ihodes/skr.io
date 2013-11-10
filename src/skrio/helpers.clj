@@ -20,9 +20,10 @@
 (def access-denied (status (response "Access Denied") 401))
 
 
+(def remove-user #(dissoc % :user))
 (defn remove-users
   [coll]
-  (map #(dissoc % :user) coll))
+  (map remove-user coll))
 (defn rename-id
   [m]
   (set/rename-keys m {:_id :id}))
@@ -32,6 +33,9 @@
 (defn prepare-ids
   [coll] 
   (map  prepare-id coll))
+(defn truncate-text
+  [texts]
+  (map #(update-in % [:text] (fn [t] (->> t (take 10) (apply str)))) texts))
 
 
 (defn gen-secret
