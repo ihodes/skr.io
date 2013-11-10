@@ -2,8 +2,9 @@
   (:use skrio.helpers
         [clojure.string :only (split)]
         [clojure.set :only (rename-keys)]
-        [clojure.data.codec.base64 :only (encode decode)]
-        [ring.util.response :only (charset)]))
+        [ring.util.response :only (charset)])
+  (:require [ring.util.codec :as codec]
+            [clojure.data.json :as json]))
 
 (defn make-wrap-user
   [handler lookup]
@@ -31,9 +32,36 @@
     (let [response (handler request)]
       (charset response "utf-8"))))
 
-
 (defn wrap-append-newline
   [handler]
   (fn [request]
     (let [response (handler request)]
       (update-in response [:body] #(str % \newline)))))
+
+(defn wrap-string-body
+  [handler]
+  (fn [request]
+    (handler (update-in request [:body] slurp))))
+
+(defn wrap-body-json-request
+  [handler]
+  (fn [request]
+    (try (let [json-map (json/read-str (:body request))]
+           (handler (merge-with merge request {:json json-map})))
+         (catch Exception e (handler request)))))
+
+(defn wrap-query-string-params-request
+  [handler]
+  (fn [request]
+    (try (let [qs-map (codec/form-decode (:query-string request))]
+           (handler (merge-with merge request {:query-string-params qs-map
+                                               :params qs-map})))
+         (catch Exception e (handler request)))))
+
+(defn wrap-body-params-request
+  [handler]
+  (fn [request]
+    (try (let [p-map (codec/form-decode (:body request))]
+           (handler (merge-with merge request {:body-params p-map
+                                               :params p-map})))
+         (catch Exception e (handler request)))))

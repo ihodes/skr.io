@@ -15,13 +15,13 @@
 
 (defmethod extract-text "application/x-www-form-urlencoded"
   [req]
-  (if (contains? (:params req) :text)
-    {:text (:text (:params req)) :content-type "text/plain"}
+  (if (contains? (:body-params req) "text")
+    {:text (get (:body-params req) "text") :content-type "text/plain"}
     (throw (Exception. (:x-www-form-urlencoded extraction-errors)))))
 
 (defmethod extract-text "application/json"
   [req]
-  (let [body (slurp (:body req))]
+  (let [body (:body req)]
     (try
       (json/read-str body)
       {:text body :content-type "application/json"}
@@ -29,12 +29,12 @@
 
 (defmethod extract-text "application/markdown"
   [req]
-  {:text (slurp (:body req)) :content-type (:content-type req)})
+  {:text (:body req) :content-type (:content-type req)})
 
 ;; TK TODO: This doesn't work (wrt checking validity of XML)
 (defmethod extract-text "application/xml"
   [req]
-  (let [body (slurp (:body req))]
+  (let [body (:body req)]
     (try
       (xml/parse-str body)
       {:text body :content-type "application/xml"}
@@ -42,13 +42,13 @@
 
 (defmethod extract-text "text/plain"
   [req]
-  {:text (slurp (:body req)) :content-type "text/plain"})
+  {:text (:body req) :content-type "text/plain"})
 
 (defmethod extract-text "text/html"
   [req]
-  {:text (slurp (:body req)) :content-type "text/html"})
+  {:text (:body req) :content-type "text/html"})
 
 (defmethod extract-text :default
   [req]
-  {:text (slurp (:body req)) :content-type "text/plain"})
+  {:text (:body req) :content-type "text/plain"})
 

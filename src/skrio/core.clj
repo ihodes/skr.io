@@ -11,6 +11,7 @@
   (:require [skrio.pages :as pages]
             [clojure.string :as cstring]
             [compojure.handler :as handler]
+            [clojure.data.json :as json]
             [compojure.route :as route]
             [ring.middleware.logger :as logger]
             [ring.middleware.json :as ring-json]
@@ -24,6 +25,9 @@
 (def config {:token-length  (Integer. (str (env :skrio-token-length)))
              :max-text-size (Integer. (str (env :skrio-max-text-size)))
              :mongodb-url   (env :mongodb-url)})
+(def allowed-content-types 
+  #{"application/x-www-form-urlencoded" "application/json" "application/xml"
+    "application/markdown" "text/html" "text/plain"})
 
 (mg/connect-via-uri! (:mongodb-url config))
 
@@ -43,7 +47,9 @@
    {:texts (let [texts (mc/find-maps "texts" {:user (get-in req [:user :id])})]
              (-> texts remove-users prepare-ids truncate-text))}))
 
-(defn- -text-meta [] {:name "<untitled>" :created-on (.getTime (java.util.Date.))})
+(defn- -default-text-meta [content-type]
+  {:name "<untitled>" :created-on (.getTime (java.util.Date.))
+   :content-type content-type :public false})
 (defn- create-text
   [req]
   (let [user (:user req)
@@ -56,8 +62,7 @@
             (respond-json-413 (:text-length-error errors))
             (do
               (mc/insert "texts" {:_id oid :text text :user (:id user)
-                                  :public false :content-type content-type
-                                  :metadata (-text-meta)})
+                                  :metadata (-default-text-meta content-type)})
               (respond 201 (str-_id (mc/find-map-by-id "texts" oid))))))
         (catch Exception e (respond-json-400 (str (.getMessage e))))))))
 
@@ -82,7 +87,8 @@
   [text-id req]
   (try
     (let [{text-id :id to :to :or {to "txt"}} (extract-id text-id)
-          text (mc/find-one-as-map "texts" {:_id (ObjectId. text-id) :public true})
+          text (mc/find-one-as-map "texts" {:_id (ObjectId. text-id)
+                                            :metadata.public true})
           {text :text type :content-type} (convert text (keyword to))]
       (if text
         (content-type (response text) type)
@@ -94,7 +100,7 @@
   (try
     (if-let [user (:user req)]
       (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)}
-                 {"$set" {:text (:text (:params req))}}))
+                 {"$set" {:text (get-in req [:body-params "text"])}}))
     (catch Exception e))
   (response text-id))
 
@@ -104,7 +110,7 @@
     (if-let [user (:user req)]
       (mc/update "texts"
                  {:_id (ObjectId. text-id) :user (:id user)}
-                 {"$set" {:public true}}))
+                 {"$set" {:metadata.public true}}))
     (catch Exception e))
   (response text-id))
 
@@ -114,7 +120,7 @@
     (if-let [user (:user req)]
       (mc/update "texts"
                  {:_id (ObjectId. text-id) :user (:id user)}
-                 {"$set" {:public false}}))
+                 {"$set" {:metadata.public false}}))
     (catch Exception e))
   (response text-id))
 
@@ -126,34 +132,47 @@
     (catch Exception e))
   (response text-id))
 
+(defn- set-text-content-type
+  [text-id req]
+  (if-let [new-content-type (get-in req [:body-params "content-type"])]
+    (if (contains? allowed-content-types new-content-type) 
+      (do (try
+            (if-let [user (:user req)]
+              (mc/update "texts"
+                {:_id (ObjectId. text-id) :user (:id user)}
+                {"$set" {"metadata.content-type" new-content-type}}))
+            (catch Exception e))
+          (response text-id))
+      (respond-json-400 "Content-type not allowed."))
+    (respond-json-400 "content-type required")))
+
 (defn- get-text-metadata
   [text-id req]
   (let [user (:user req)
         text-o (mc/find-map-by-id "texts" (ObjectId. text-id))]
     (try
       (if (can-access? user text-o)
-        (respond (:metadata text-o))
+        (respond (merge (:metadata text-o)))
         (respond-json-404))
       (catch Exception e (respond-json-500)))))
 
 (defn- modify-text-metadata
   [text-id req]
   (try
-    (let [t       (slurp (:body req))
+    (let [t       (:body req) ;; TK? \/ keywords shouldn't have a . in them
           metadata (json/read-str t :key-fn (comp keyword (partial str "metadata.")))
           user (:user req)
           text-o (mc/find-map-by-id "texts" (ObjectId. text-id))]
       (if (can-access? user text-o)
         (do
-          (println (str metadata))
           (mc/update "texts" {:_id (ObjectId. text-id)} {"$set" metadata})
           (response (:metadata (mc/find-map-by-id "texts" (ObjectId. text-id)))))
         (respond-json-404)))
-    (catch Exception e (respond-json-400 "JSON is malformed."))))
+    (catch Exception e (respond-json-400 "JSON is malformed or nested."))))
 
 (defn- remove-text-metadata
   [text-id req]
-  (let [keyname (get-in req [:params :keyname])
+  (let [keyname (get-in req [:body-params "keyname"])
         user    (:user req)
         text-o  (mc/find-map-by-id "texts" (ObjectId. text-id))]
     (try
@@ -163,7 +182,7 @@
                      {"$unset" {(str "metadata." keyname) ""}})
           (respond {:msg (str "\"" keyname "\" was removed")}))
         (respond-json-404))
-      (catch Exception e (respond-json-500)))))
+      (catch Exception e (respond-json-400)))))
 
 
 ;;;;;;;;;;;;;;
@@ -172,7 +191,7 @@
 
 (defn- create-user
   [req]
-  (let [{{:keys [email password]} :params} req]
+  (let [{{:keys [email password]} :body-params} req]
     (cond (< (count password) 8) (respond-json-400 "password must be 8+ chars")
           (not (re-matches #".+@.+\..+" email)) (respond-json-400 "invalid email")
           :else (let [oid (ObjectId.)
@@ -190,8 +209,7 @@
   [user-id req]
   (if (and (:user req) (= (str (:id (:user req))) user-id))
     (try
-      (response (dissoc (prepare-id (mc/find-map-by-id "users" (ObjectId. user-id)))
-                        :password :csrf-token))
+      (response (dissoc (prepare-id (:user req)) :password :csrf-token))
       (catch Exception e (respond-json-404)))
     (respond-json-404)))
 
@@ -210,7 +228,7 @@
 
 (defroutes web
   (GET "/" [] pages/index)
-  (ANY "/ping" [] (comp response str)) ;; TK disable in production
+  (ANY "/ping" [] (comp response #(json/write-str % :value-fn str))) ;; TK disable in production
   (route/files "/public"))
 
 
@@ -232,6 +250,7 @@
     (GET    "/meta"    [] (partial get-text-metadata    text-id))
     (POST   "/meta"    [] (partial modify-text-metadata text-id))
     (DELETE "/meta"    [] (partial remove-text-metadata text-id))
+    (POST   "/content-type"  [] (partial set-text-content-type text-id))
     (DELETE "/"        [] (partial delete-text text-id))))
 
 (defroutes public-texts
@@ -245,12 +264,16 @@
   (route/not-found (respond-json-404)))
 
 (def app (-> skrio-routes
-             (make-wrap-user #(mc/find-one-as-map "users" {:api-token %}))
-             wrap-basic-auth
              logger/wrap-with-logger
              ring-json/wrap-json-response
+             (make-wrap-user #(mc/find-one-as-map "users" {:api-token %}))
+             wrap-basic-auth
              wrap-append-newline
-             wrap-utf-8))
+             wrap-utf-8
+             wrap-query-string-params-request
+             wrap-body-params-request
+             wrap-body-json-request
+             wrap-string-body))
 
 
 ;;;;;;;;;;;;;;;;;;;;;

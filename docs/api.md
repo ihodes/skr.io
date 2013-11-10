@@ -119,20 +119,6 @@ You may **delete** a text, returning the UUID of the text:
     curl -X DELETE .../text/<text-id>
 
 
-### Publicize Text
-
-You may **publicize** a text, making the text available to those without API tokens/secrets at the URL `https://api.skr.io/text/<text-id>`, returning the UUID of the text:
-
-    curl -X POST .../text/<text-id>/public
-
-
-### Privatize Text
-
-You may **privatize** a text, making the text no longer available to the public, returning the UUID of the text:
-
-    curl -X POST .../text/<text-id>/private
-
-
 ### Get Metadata for Text
 
 You may get the **metadata** of a text:
@@ -152,6 +138,8 @@ The JSON object should include only the keys and values which should be updated;
 
 NB: The `Content-type` header is not required here; skr.io will assume that the `content-type` is `application/json` and ignore the header.
 
+NB: Metadata cannot be nested; no JSON Objects are allows within the metadata object (for now.)
+
 ### Remove Metadata for Text
 
 You may remove **metadata** of a text:
@@ -159,3 +147,31 @@ You may remove **metadata** of a text:
     curl -X DELETE .../text/<text-id>/meta -dkeyname="<name>"
 
 Removes the key/value of any key in the metadata with name `name`.
+
+### Publicize Text
+
+You may **publicize** a text, making the text available to those without API tokens/secrets at the URL `https://api.skr.io/text/<text-id>`, returning the UUID of the text:
+
+    curl -X POST .../text/<text-id>/public
+
+This is a convenience method for setting the `public` property to true on the text's  metadata.
+
+### Privatize Text
+
+You may **privatize** a text, making the text no longer available to the public, returning the UUID of the text:
+
+    curl -X POST .../text/<text-id>/private
+
+This is a convenience method for setting the `public` property to false on the text's  metadata.
+
+### Set Content-type
+
+You may set the **metadata** of a text:
+
+    curl -X POST .../text/<text-id>/content-type -dcontent-type="<content-type>"
+
+This is a convenience method for setting the `content-type` property on the text's  metadata.
+
+<content-type> may be one of any (and only) "application/x-www-form-urlencoded", "application/json", "application/xml", "application/markdown", "text/html", "text/plain".
+
+Changing this will change which extensions your text object can have applied to it (c.f. get/get public methods), so be careful with this.

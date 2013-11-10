@@ -7,7 +7,7 @@
 
 
 (def text-conversions
-  {:text/plain           {:default [identity "text/plain"]
+  {"text/plain"           {:default [identity "text/plain"]
                           :txt     [identity "text/plain"]
                           :html    [(fn [text]
                                       (h/html [:html
@@ -15,11 +15,11 @@
                                                [:body [:p text]]]))
                                     "text/html"]}
 
-   :text/html            {:default [identity "text/html"]
+   "text/html"            {:default [identity "text/html"]
                           :txt     [identity "text/plain"]
                           :html    [identity "text/html"]}
 
-   :application/json     {:default [identity "application/json"]
+   "application/json"     {:default [identity "application/json"]
                           :json    [identity "application/json"]
                           :txt     [identity "text/plain"]
                           :html    [(fn [text]
@@ -28,12 +28,12 @@
                                                [:body [:pre text]]]))
                                     "text/html"]}
 
-   :application/xml      {:default [identity "application/xml"]
+   "application/xml"      {:default [identity "application/xml"]
                           :xml     [identity "application/xml"]
                           :txt     [identity "text/plain"]
                           :html    [identity "text/html"]}
 
-   :application/markdown {:default [identity "text/plain"]
+   "application/markdown" {:default [identity "text/plain"]
                           :txt     [identity "text/plain"]
                           :render  [(fn [text] (md/md-to-html-string (str text \newline \newline)))
                                     "text/plain"]
@@ -51,8 +51,8 @@
                                     "text/html"]}})
 
 
-(defn convert [{:keys [text content-type]} to]
-  (if-let [[f r-content-type] (get-in text-conversions [(keyword content-type) to])]
+(defn convert [{text :text {content-type :content-type} :metadata} to]
+  (if-let [[f r-content-type] (get-in text-conversions [content-type to])]
     {:text (f text) :content-type r-content-type}
     (throw
      (Exception. (str "Cannot convert " (name content-type) " to " (name to) ".")))))

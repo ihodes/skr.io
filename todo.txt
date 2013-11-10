@@ -1,5 +1,6 @@
 # TODO
 
+
 1. Better formatting of text, json, etc pages
 2. Queries
   - XPath    queries at .xml?q=
@@ -12,5 +13,7 @@
 7. Admin Page (for looking at users) -- need admin flag on user
 8. Setup Stripe
 
+9. Add parameter validation a la loch, and response cleaning a la loch
 10. Add source-code... Content-type: source/clojure, etc
     - with exts .txt, .render, .html
+11. Allow nested metadata

@@ -34,8 +34,13 @@
   [coll] 
   (map  prepare-id coll))
 (defn truncate-text
+  [text]
+  (if (> (count text) 25)
+    (str (apply str (take 24 text)) "…")
+    text))
+(defn truncate-texts
   [texts]
-  (map #(update-in % [:text] (fn [t] (->> t (take 10) (apply str)))) texts))
+  (map truncate-text texts))
 
 
 (defn gen-secret
