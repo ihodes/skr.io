@@ -109,7 +109,7 @@ You may **replace** a text's contents, returning the UUID of the text:
 
     curl -X PUT .../text/<text-id> -dtext="This is the new text."
 
-NB: Currently, you can only update data with the `x-www-form-urlencoded` data at the `text` key.
+If you'd like to post e.g. a file with `--data-binary`, and cannot use the `text` key, send any other content-type (e.g. `-H"Content-type: text/plain"`) and your text will be updated with the entire PUT body instead.
 
 
 ### Delete Text

@@ -103,7 +103,9 @@
   (try
     (if-let [user (:user req)]
       (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)}
-                 {"$set" {:text (get-in req [:body-params "text"])}}))
+                 {"$set" {:text (if (= (:content-type req) "application/x-www-form-urlencoded")
+                                  (get-in req [:body-params "text"])
+                                  (:body req))}}))
     (catch Exception e))
   (response text-id))
 
@@ -194,7 +196,7 @@
 
 (defn- create-user
   [req]
-  (let [{{:keys [email password]} :body-params} req]
+  (let [{{email "email" password "password"} :body-params} req]
     (cond (< (count password) 8) (respond-json-400 "password must be 8+ chars")
           (not (re-matches #".+@.+\..+" email)) (respond-json-400 "invalid email")
           :else (let [oid (ObjectId.)
