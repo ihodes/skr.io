@@ -25,7 +25,15 @@
       [:p "We're a simple database in the cloud; as much as you like, or as simple as can be. If you need something else, and we don't offer it yet, send us an <a href=\"mailto:isaac@marion.io\" target=\"_blank\">email</a> and we'll see what we can do."]
       [:p "We expose a simple interface to your text online. With it you can store, display (in multiple formats), query (with XPath or JSONPath, if the text is JSON or XML), render into HTML (if it is Markdown), displayed nicely with syntax highlighting and all (if any format), add and remove metadata, or simply returned as it was posted; in plain text. "]
       [:p "<b>Our API docs can be found <a style=\"font-weight:700;\" href=\"http://skrio.herokuapp.com/text/527ea6a8e4b090f819cc2968.html\">here</a></b>. Hosted, of course, using <code>Skr.io</code>. If you like, you can change the extension on the url to <code>.render</code> or <code>.txt</code> and see what happens."]
+
+      [:h2 "Sign Up for Beta Access...Today!"]
       
+      "<form action= \"http://healthtracr.us5.list-manage.com/subscribe/post?u=e92d9c0a54fa38c0a18563aaa&amp;id=da10ced0b5\" method= \"post\" id= \"mc-embedded-subscribe-form\" name= \"mc-embedded-subscribe-form\" class= \"validate\" target= \"_blank\" novalidate>
+  <input type= \"email\" value= \"\" name= \"EMAIL\" style=\"padding: 13px;width:430px;\" placeholder=\"email@example.com\">
+  <input type= \"submit\" value= \"Signup for Beta, Now!\" name= \"subscribe\" style=\"background-color: #689805; border-radius: 5px; border: 2px solid #68b805; padding: 14px 36px;width:330px;font-weight:700; \">
+</form>"
+
+
       [:h2 "How does this work?"]
       [:p "In about a minute or two, you'll see just what you can do with <code>Skr.io</code>."]
       [:p "Most of these commands require an API token and secret; you can authenticate using basic auth. You can get a key and secret by signing up; it's free and easy. You should do it and follow along with real credentials."]
