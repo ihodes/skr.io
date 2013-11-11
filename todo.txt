@@ -17,3 +17,4 @@
 10. Add source-code... Content-type: source/clojure, etc
     - with exts .txt, .render, .html
 11. Allow nested metadata
+12. Allow delation of multiple metadata keyvals

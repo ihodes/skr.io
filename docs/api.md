@@ -10,7 +10,7 @@ The base URL for all API requests is
 
     http://<token>:<secret>@skrio.herokuapp.com/api/v.1/
 
-(This will become <https://api.skr.io/> soon...)
+(This will become https://api.skr.io/ soon...)
 
 
 ## Errors

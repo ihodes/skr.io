@@ -35,8 +35,11 @@
 (defn wrap-append-newline
   [handler]
   (fn [request]
-    (let [response (handler request)]
-      (update-in response [:body] #(str % \newline)))))
+    (let [response (handler request)
+          body (:body response)]
+      (if (instance? String body)
+        (update-in response [:body] #(str % \newline))
+        response))))
 
 (defn wrap-string-body
   [handler]
