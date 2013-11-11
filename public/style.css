@@ -1,4 +1,14 @@
-body { margin: 79px auto; width: 650px; padding: 0; color: #222;
-       font-family: Georgia; }
-a { text-decoration: none; } 
+body { margin: 79px auto; width: 800px; padding: 0; color: #222;
+       font-family: "proxima-nova", Georgia, serif; font-weight: 300; font-size: 18px; 
+       line-height: 26px; }
+h1, h2, h3, h4, h5, h6, h7 { font-weight: 700; font-family: "museo-slab", Georgia, serif; margin-top: 37px; }
+h1 { font-size: 3em; }
+a { text-decoration: none; border-bottom: 1px dotted purple;}
+a:hover { font-weight: 700; }
+code, pre { font-family: "inconsolata"}
+
+.codez   { font-size: .9em; margin-top: 37px; }
+.explain { padding: 9px 0px; margin: 0; }
+.example { padding: 9px 17px; margin: 0; border-left: 4px solid #b9b9b9;}
+
 

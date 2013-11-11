@@ -7,7 +7,7 @@
         skrio.responses
         skrio.jsonpp
         [environ.core :only (env)]
-        [ring.util.response :only (status response content-type header)])
+        [ring.util.response :only (status response content-type header file-response)])
   (:import  [org.bson.types ObjectId])
   (:require [skrio.pages :as pages]
             [clojure.string :as cstring]

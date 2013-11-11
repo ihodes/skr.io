@@ -1,7 +1,6 @@
 # TODO
 
 
-1. Getting started page (maybe on the landing page...)
 2. Signup page
   - means we need sessions
 3. Track usage of API
@@ -14,3 +13,4 @@
     - with exts .txt, .render, .html
 9. Allow nested metadata
 10. Allow delation of multiple metadata keyvals
+11. Allow updating/deleting/adding of JSON and XML (and other?) with JSONPath/XPath
