@@ -4,7 +4,8 @@
         [clojure.set :only (rename-keys)]
         [ring.util.response :only (charset)])
   (:require [ring.util.codec :as codec]
-            [clojure.data.json :as json]))
+            [clojure.data.json :as json]
+            [cheshire.core :as ch]))
 
 (defn make-wrap-user
   [handler lookup]
@@ -41,6 +42,15 @@
         (update-in response [:body] #(str % \newline))
         response))))
 
+(defn wrap-json-response
+  [handler]  
+  (fn [request]
+    (let [response (handler request)
+          body (:body response)]
+      (if (instance? clojure.lang.PersistentArrayMap body)
+        (update-in response [:body] #(ch/generate-string % {:pretty true}))
+        response))))
+
 (defn wrap-string-body
   [handler]
   (fn [request]
@@ -68,3 +78,12 @@
            (handler (merge-with merge request {:body-params p-map
                                                :params p-map})))
          (catch Exception e (handler request)))))
+
+(defn wrap-with-ppxml [handler]
+  (fn [request]
+    (let [response (handler request)
+          ctype (get-in response [:headers "Content-Type"])]
+      (if (and ctype (re-matches #"(?i).*text/html.*" ctype))
+        (try (assoc response :body (ppxml (:body response)))
+             (catch Exception e response))
+        response))))

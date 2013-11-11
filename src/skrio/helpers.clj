@@ -2,7 +2,10 @@
   (:use [ring.util.response :only (status response content-type header)])
   (:require [clojure.set :as set]
             [clojurewerkz.scrypt.core :as scrypt]
-            [clojure.data.codec.base64 :as b64]))
+            [clojure.data.codec.base64 :as b64])
+  (:import [java.io StringReader StringWriter]
+           [javax.xml.transform TransformerFactory OutputKeys]
+           [javax.xml.transform.stream StreamSource StreamResult]))
 
 
 
@@ -59,3 +62,21 @@
 (defn auth
   [resp]
   (header resp "WWW-Authenticate" "Basic realm=\"texts\""))
+
+
+;; from http://nakkaya.com/2010/03/27/pretty-printing-xml-with-clojure/ 
+(defn ppxml
+  "Accepts an XML string with no newline formatting and returns the
+ same XML with pretty-print formatting, as described by Nurullah Akaya
+ in [this post](http://goo.gl/Y9OVO)."
+  [xml-str]
+  (let [in  (StreamSource. (StringReader. xml-str))
+        out (StreamResult. (StringWriter.))
+        transformer (.newTransformer
+                     (TransformerFactory/newInstance))]
+    (doseq [[prop val] {OutputKeys/INDENT "yes"
+                        OutputKeys/METHOD "xml"
+                        "{http://xml.apache.org/xslt}indent-amount" "2"}]
+      (.setOutputProperty transformer prop val))
+    (.transform transformer in out)
+    (apply str (drop 38 (str (.getWriter out))))))

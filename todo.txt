@@ -1,7 +1,6 @@
 # TODO
 
 
-1. Better formatting of text, json, etc pages
 2. Queries
   - XPath    queries at .xml?q=
   - JSONPath queries at .json?q=

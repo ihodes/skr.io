@@ -5,6 +5,7 @@
         skrio.extractor
         skrio.conversion
         skrio.responses
+        skrio.jsonpp
         [environ.core :only (env)]
         [ring.util.response :only (status response content-type header)])
   (:import  [org.bson.types ObjectId])
@@ -265,7 +266,8 @@
 
 (def app (-> skrio-routes
              logger/wrap-with-logger
-             ring-json/wrap-json-response
+             wrap-with-ppxml
+             wrap-json-response
              (make-wrap-user #(mc/find-one-as-map "users" {:api-token %}))
              wrap-basic-auth
              wrap-append-newline
