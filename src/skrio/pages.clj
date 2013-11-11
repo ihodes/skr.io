@@ -5,7 +5,7 @@
 
 
 (defn index [req]
-  (slurp "http://www.skr.io/text/52812105e4b0d8576eb63bbf.html"))
+  (slurp "http://www.skr.io/text/52812197e4b0b1a5cf4f462d.html"))
 
 (defn -old-index [req]
   (render

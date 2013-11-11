@@ -2,6 +2,7 @@ body { margin: 79px auto; width: 800px; padding: 0; color: #222;
        font-family: "proxima-nova", Georgia, serif; font-weight: 300; font-size: 18px; 
        line-height: 26px; }
 h1, h2, h3, h4, h5, h6, h7 { font-weight: 700; font-family: "museo-slab", Georgia, serif; margin-top: 37px; }
+h1 { line-height: 1.1em;}
 h1 { font-size: 3em; }
 a { text-decoration: none; border-bottom: 1px dotted purple;}
 a:hover { font-weight: 700; }
