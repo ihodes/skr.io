@@ -1,16 +1,17 @@
 # TODO
 
 
-2. Signup page
-  - means we need sessions
-3. Track usage of API
-4. User account page (show useage, basic graphical browser)
-5. Admin Page (for looking at users) -- need admin flag on user
-6. Setup Stripe
+1. Track usage of API
+   - user creation
+   - user edit (metadata or otherwise)
+   - visiting a text
+2. User signin, sessions, account page (show useage, basic graphical browser)
+3. Admin Page (for looking at users) -- need admin flag on user
+4. Setup Stripe, premium page
 
-7. Add parameter validation a la loch, and response cleaning a la loch
-8. Add source-code... Content-type: source/clojure, etc
+5. Add parameter validation a la loch, and response cleaning a la loch
+6. Add source-code... Content-type: source/clojure, etc
     - with exts .txt, .render, .html
-9. Allow nested metadata
-10. Allow delation of multiple metadata keyvals
-11. Allow updating/deleting/adding of JSON and XML (and other?) with JSONPath/XPath
+7. Allow nested metadata
+8. Allow delation of multiple metadata keyvals
+9. Allow updating/deleting/adding of JSON and XML (and other?) with JSONPath/XPath

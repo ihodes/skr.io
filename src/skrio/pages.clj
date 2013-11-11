@@ -28,9 +28,9 @@
      
      [:body
       [:h1 "Text Online, Better<code style=\"size:.8em;color:#b9b9b9\">.txt</code>"]
-      [:p [:b "Skr.io is a REST-inspired API for the storage &amp; retrieval of text."]]
-      [:p "We're a simple database in the cloud; as much as you like, or as simple as can be. If you need something else, and we don't offer it yet, send us an <a href=\"mailto:isaac@marion.io\" target=\"_blank\">email</a> and we'll see what we can do."]
-      [:p "We expose a simple interface to your text online. With it you can store, display (in multiple formats), query (with XPath or JSONPath, if the text is JSON or XML), render into HTML (if it is Markdown), displayed nicely with syntax highlighting and all (if any format), add and remove metadata, or simply returned as it was posted; in plain text. "]
+      [:p [:b "Skr.io is an API for the storage, display, querying &amp; retrieval of textual data."]]
+      [:p "We're a simple database in the cloud. If you need a feature else, and we don't offer it yet, send us an <a href=\"mailto:isaac@marion.io\" target=\"_blank\">email</a> and we'll see what we can do. More improvements & features are being added all of the time."]
+      [:p "We expose a simple interface to your text online. With it you can store, display (in multiple formats), query (with XPath or JSONPath), render into HTML (if it is Markdown), displayed nicely with syntax highlighting and all (if any format), add and remove metadata, or simply returned as it was posted; in plain text. "]
       [:p "<b>Our API docs can be found <a style=\"font-weight:700;\" href=\"http://skr.io/text/527ea6a8e4b090f819cc2968.html\">here</a></b>. Hosted, of course, using <code>Skr.io</code>. If you like, you can change the extension on the url to <code>.render</code> or <code>.txt</code> and see what happens."]
 
       [:h2 "Sign Up for Beta Access...Today!"]

@@ -231,7 +231,8 @@
 
 (defroutes web
   (GET "/" [] pages/index)
-  (ANY "/ping" [] (comp response #(json/write-str % :value-fn str))) ;; TK disable in production
+  (GET "/favicon.ico" [] (file-response "/public/favicon.ico")) ;; meh doesn't work
+  #_(ANY "/ping" [] (comp response #(json/write-str % :value-fn str))) ;; TK disable in production
   (route/files "/public"))
 
 
