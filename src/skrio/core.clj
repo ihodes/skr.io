@@ -269,7 +269,6 @@
 
 (def app (-> skrio-routes
              logger/wrap-with-logger
-             wrap-with-ppxml
              wrap-json-response
              (make-wrap-user #(mc/find-one-as-map "users" {:api-token %}))
              wrap-basic-auth
