@@ -31,7 +31,7 @@
       [:p [:b "Skr.io is a REST-inspired API for the storage &amp; retrieval of text."]]
       [:p "We're a simple database in the cloud; as much as you like, or as simple as can be. If you need something else, and we don't offer it yet, send us an <a href=\"mailto:isaac@marion.io\" target=\"_blank\">email</a> and we'll see what we can do."]
       [:p "We expose a simple interface to your text online. With it you can store, display (in multiple formats), query (with XPath or JSONPath, if the text is JSON or XML), render into HTML (if it is Markdown), displayed nicely with syntax highlighting and all (if any format), add and remove metadata, or simply returned as it was posted; in plain text. "]
-      [:p "<b>Our API docs can be found <a style=\"font-weight:700;\" href=\"http://skrio.herokuapp.com/text/527ea6a8e4b090f819cc2968.html\">here</a></b>. Hosted, of course, using <code>Skr.io</code>. If you like, you can change the extension on the url to <code>.render</code> or <code>.txt</code> and see what happens."]
+      [:p "<b>Our API docs can be found <a style=\"font-weight:700;\" href=\"http://skr.io/text/527ea6a8e4b090f819cc2968.html\">here</a></b>. Hosted, of course, using <code>Skr.io</code>. If you like, you can change the extension on the url to <code>.render</code> or <code>.txt</code> and see what happens."]
 
       [:h2 "Sign Up for Beta Access...Today!"]
       
@@ -73,7 +73,7 @@
         (str "...which should, naturally, return \"pie\". This queries can get quite complex, including predicates and other shenanigans. This is a very powerful way to query your text.")]
 
        [:p {:class "explain col"}
-        (str "Even more information can be found in the <a href=\"http://skrio.herokuapp.com/text/527ea6a8e4b090f819cc2968.html\">API</a> documentation, and more features are being added regularly. The documenation itself was published by posting some text formatted with <a href=\"http://daringfireball.net/projects/markdown/\">Markdown</a> with content-type <code>application/markdown</code>, and rendered so nicely by adding a <code>.html</code> extension to the URL (and, obviously, made public so that you can see it. You can check out some other formatting options by replacing the <code>.html</code> with a <code>.txt</code> or <code>.render</code> (or even no extension at all). Other content-types have other extensions which can be applied to them; c.f. the documenation. Again, feel free to email me at <a href=\"mailto:isaac@marion.io\">isaac@marion.io</a> if you have any question, comments, or requests.")]
+        (str "Even more information can be found in the <a href=\"http://skr.io/text/527ea6a8e4b090f819cc2968.html\">API</a> documentation, and more features are being added regularly. The documenation itself was published by posting some text formatted with <a href=\"http://daringfireball.net/projects/markdown/\">Markdown</a> with content-type <code>application/markdown</code>, and rendered so nicely by adding a <code>.html</code> extension to the URL (and, obviously, made public so that you can see it. You can check out some other formatting options by replacing the <code>.html</code> with a <code>.txt</code> or <code>.render</code> (or even no extension at all). Other content-types have other extensions which can be applied to them; c.f. the documenation. Again, feel free to email me at <a href=\"mailto:isaac@marion.io\">isaac@marion.io</a> if you have any question, comments, or requests.")]
        
        ]
 
