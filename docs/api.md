@@ -175,3 +175,15 @@ This is a convenience method for setting the `content-type` property on the text
 <content-type> may be one of any (and only) "application/x-www-form-urlencoded", "application/json", "application/xml", "application/markdown", "text/html", "text/plain".
 
 Changing this will change which extensions your text object can have applied to it (c.f. get/get public methods), so be careful with this.
+
+### Querying JSON and XML Documents
+
+To **query** a text, returning the value of the key or node:
+
+    curl http://skr.io/api/v.1/text/<text-id>?q=<query>
+
+Texts with Content-types application/json or application/xml may be queried with a subset [JSONPath](http://goessner.net/articles/JsonPath/) or [XPath](http://en.wikipedia.org/wiki/XPath) respectively.
+
+XPath queries may only select text (not attributes), and JSONPath queries may not use array slicing, or array indices, or script expressions. (All of these features are in the works).
+
+

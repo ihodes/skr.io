@@ -46,7 +46,7 @@
   [req]
   (response
    {:texts (let [texts (mc/find-maps "texts" {:user (get-in req [:user :id])})]
-             (-> texts remove-users prepare-ids truncate-text))}))
+             (-> texts remove-users prepare-ids truncate-texts))}))
 
 (defn- -default-text-meta [content-type]
   {:name "<untitled>" :created-on (.getTime (java.util.Date.))
@@ -80,7 +80,8 @@
        (not (can-access? user text-o)) (auth (respond-json-401))
        :else 
        (try
-         (let [{text :text type :content-type} (convert text-o (keyword to))]
+         (let [{text :text type :content-type}
+               (convert text-o (keyword to) (get-in req [:query-string-params "q"]))]
            (content-type (response text) type))
          (catch Exception e (respond-json-400)))))))
 
@@ -90,7 +91,8 @@
     (let [{text-id :id to :to :or {to "txt"}} (extract-id text-id)
           text (mc/find-one-as-map "texts" {:_id (ObjectId. text-id)
                                             :metadata.public true})
-          {text :text type :content-type} (convert text (keyword to))]
+          {text :text type :content-type} 
+          (convert text (keyword to) (get-in req [:query-string-params "q"]))]
       (if text
         (content-type (response text) type)
         (respond-json-404)))

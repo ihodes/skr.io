@@ -15,6 +15,8 @@
                  [compojure "1.1.5"]
 
                  [environ "0.4.0"]
+                 [json-path "0.2.0"]
+                 [com.github.kyleburton/clj-xpath "1.4.3"]
                  [cheshire "5.2.0"]
                  [clojurewerkz/scrypt "1.0.0"]
                  [com.novemberain/monger "1.7.0-beta1"]

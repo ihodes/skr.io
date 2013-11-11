@@ -1,19 +1,16 @@
 # TODO
 
 
-2. Queries
-  - XPath    queries at .xml?q=
-  - JSONPath queries at .json?q=
-3. Getting started page (maybe on the landing page...)
-4. Signup page
+1. Getting started page (maybe on the landing page...)
+2. Signup page
   - means we need sessions
-5. Track usage of API
-6. User account page (show useage, basic graphical browser)
-7. Admin Page (for looking at users) -- need admin flag on user
-8. Setup Stripe
+3. Track usage of API
+4. User account page (show useage, basic graphical browser)
+5. Admin Page (for looking at users) -- need admin flag on user
+6. Setup Stripe
 
-9. Add parameter validation a la loch, and response cleaning a la loch
-10. Add source-code... Content-type: source/clojure, etc
+7. Add parameter validation a la loch, and response cleaning a la loch
+8. Add source-code... Content-type: source/clojure, etc
     - with exts .txt, .render, .html
-11. Allow nested metadata
-12. Allow delation of multiple metadata keyvals
+9. Allow nested metadata
+10. Allow delation of multiple metadata keyvals

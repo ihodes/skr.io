@@ -37,10 +37,10 @@
   [coll] 
   (map  prepare-id coll))
 (defn truncate-text
-  [text]
-  (if (> (count text) 25)
-    (str (apply str (take 24 text)) "…")
-    text))
+  [text-o]
+  (if (> (count (get text-o :text)) 25)
+    (update-in text-o [:text] #(str (apply str (take 24 %)) "…"))
+    text-o))
 (defn truncate-texts
   [texts]
   (map truncate-text texts))

@@ -3,6 +3,8 @@
   (:require [clojure.data.json :as json]
             [clojure.data.xml :as xml]
             [cheshire.core :as ch]
+            [json-path :as jp]
+            [clj-xpath.core :as xp]
             [markdown.core :as md]
             [hiccup.core :as h]
             [skrio.pages :as pages]))
@@ -54,16 +56,30 @@
    
    "application/markdown" {:default [identity "text/plain"]
                            :txt     [identity "text/plain"]
-                           :render  [(fn [text] (md/md-to-html-string (str text \newline \newline)))
+                           :render  [(fn [text] (md/md-to-html-string
+                                                 (str text \newline \newline)))
                                       "text/plain"]
                            :html    [#(pages/text-page "markdown"
                                                        (md/md-to-html-string
                                                         (str % "\n\n")))
                                      "text/html"]}})
 
+(defn- query
+  "Applies a query to the text (if it's of a certain type--currently JSON or XML)"
+  [text query content-type]
+  (if query 
+    (case content-type
+      "application/json" (try 
+                           (ch/generate-string 
+                            (jp/at-path query (ch/parse-string text true)))
+                           (catch Exception e text))
+      "application/xml" (try (xp/$x:text query text)
+                             (catch Exception e text))
+      text)
+    text))
 
-(defn convert [{text :text {content-type :content-type} :metadata} to]
+(defn convert [{text :text {content-type :content-type} :metadata} to & q]
   (if-let [[f r-content-type] (get-in text-conversions [content-type to])]
-    {:text (f text) :content-type r-content-type}
+    {:text (f (query text (first q) content-type)) :content-type r-content-type}
     (throw
      (Exception. (str "Cannot convert " (name content-type) " to " (name to) ".")))))
