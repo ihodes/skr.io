@@ -4,9 +4,10 @@
         compojure.response))
 
 
-
-
 (defn index [req]
+  (slurp "http://www.skr.io/text/52812105e4b0d8576eb63bbf.html"))
+
+(defn -old-index [req]
   (render
    (html (doctype :html5)
     [:html

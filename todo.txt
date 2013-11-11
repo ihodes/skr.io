@@ -1,6 +1,7 @@
 # TODO
 
 
+0. Allow PUT data to be just in the post body (not via text key)
 1. Track usage of API
    - user creation
    - user edit (metadata or otherwise)
