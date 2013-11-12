@@ -38,6 +38,12 @@
    :other "Error."})
 
 
+(defn inc-api-call [user-id call]
+  (mc/update "users" {:_id user-id} {"$inc" {(str "metrics." call) 1}}))
+
+(defn inc-text-access [text-id]
+  (mc/update "texts" {:_id text-id} {"$inc" {:accessed 1}}))
+
 ;;;;;;;;;;;;;;;
 ;; Texts API ;;
 ;;;;;;;;;;;;;;;
@@ -45,7 +51,9 @@
 (defn- get-texts
   [req]
   (response
-   {:texts (let [texts (mc/find-maps "texts" {:user (get-in req [:user :id])})]
+   {:texts (let [user-id (get-in req [:user :id])
+                 texts (mc/find-maps "texts" {:user user-id})]
+             (inc-api-call user-id :get-texts)
              (-> texts remove-users prepare-ids truncate-texts))}))
 
 (defn- -default-text-meta [content-type]
@@ -64,8 +72,9 @@
             (do
               (mc/insert "texts" {:_id oid :text text :user (:id user)
                                   :metadata (-default-text-meta content-type)})
+              (inc-api-call (:id user) :create-text)
               (respond 201 (str-_id (mc/find-map-by-id "texts" oid))))))
-        (catch Exception e (respond-json-400 (str (.getMessage e))))))))
+        (catch Exception e (respond-json-400))))))
 
 
 (defn- extract-id [s] (zipmap [:id :to] (cstring/split s #"\.")))
@@ -82,6 +91,8 @@
        (try
          (let [{text :text type :content-type}
                (convert text-o (keyword to) (get-in req [:query-string-params "q"]))]
+           (inc-api-call (:id user) :get-text)
+           (inc-text-access (ObjectId. text-id))
            (content-type (response text) type))
          (catch Exception e (respond-json-400)))))))
 
@@ -94,7 +105,9 @@
           {text :text type :content-type} 
           (convert text (keyword to) (get-in req [:query-string-params "q"]))]
       (if text
-        (content-type (response text) type)
+        (do
+          (inc-text-access (ObjectId. text-id))
+          (content-type (response text) type))
         (respond-json-404)))
     (catch Exception e (respond-json-404))))
 
@@ -102,10 +115,12 @@
   [text-id req]
   (try
     (if-let [user (:user req)]
-      (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)}
-                 {"$set" {:text (if (= (:content-type req) "application/x-www-form-urlencoded")
-                                  (get-in req [:body-params "text"])
-                                  (:body req))}}))
+      (do
+        (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)}
+                   {"$set" {:text (if (= (:content-type req) "application/x-www-form-urlencoded")
+                                    (get-in req [:body-params "text"])
+                                    (:body req))}})
+        (inc-api-call (:id user) :update-text)))
     (catch Exception e))
   (response text-id))
 
@@ -113,9 +128,11 @@
   [text-id req]
   (try
     (if-let [user (:user req)]
-      (mc/update "texts"
-                 {:_id (ObjectId. text-id) :user (:id user)}
-                 {"$set" {:metadata.public true}}))
+      (do
+        (mc/update "texts"
+          {:_id (ObjectId. text-id) :user (:id user)}
+          {"$set" {:metadata.public true}})
+        (inc-api-call (:id user) :make-text-public)))
     (catch Exception e))
   (response text-id))
 
@@ -123,9 +140,11 @@
   [text-id req]
   (try
     (if-let [user (:user req)]
-      (mc/update "texts"
-                 {:_id (ObjectId. text-id) :user (:id user)}
-                 {"$set" {:metadata.public false}}))
+      (do
+        (mc/update "texts"
+          {:_id (ObjectId. text-id) :user (:id user)}
+          {"$set" {:metadata.public false}})
+        (inc-api-call (:id user) :make-text-private)))
     (catch Exception e))
   (response text-id))
 
@@ -133,7 +152,9 @@
   [text-id req]
   (try
     (if-let [user (:user req)]
-      (mc/remove "texts" {:_id (ObjectId. text-id) :user (:id user)}))
+      (do
+        (mc/remove "texts" {:_id (ObjectId. text-id) :user (:id user)})
+        (inc-api-call (:id user) :delete-text)))
     (catch Exception e))
   (response text-id))
 
@@ -143,9 +164,11 @@
     (if (contains? allowed-content-types new-content-type) 
       (do (try
             (if-let [user (:user req)]
-              (mc/update "texts"
-                {:_id (ObjectId. text-id) :user (:id user)}
-                {"$set" {"metadata.content-type" new-content-type}}))
+              (do
+                (mc/update "texts"
+                  {:_id (ObjectId. text-id) :user (:id user)}
+                  {"$set" {"metadata.content-type" new-content-type}})
+                (inc-api-call (:id user) :set-text-content-type)))
             (catch Exception e))
           (response text-id))
       (respond-json-400 "Content-type not allowed."))
@@ -157,7 +180,9 @@
         text-o (mc/find-map-by-id "texts" (ObjectId. text-id))]
     (try
       (if (can-access? user text-o)
-        (respond (merge (:metadata text-o)))
+        (do
+          (inc-api-call (:id user) :get-text-metadata)
+          (respond (merge (:metadata text-o))))
         (respond-json-404))
       (catch Exception e (respond-json-500)))))
 
@@ -170,6 +195,7 @@
           text-o (mc/find-map-by-id "texts" (ObjectId. text-id))]
       (if (can-access? user text-o)
         (do
+          (inc-api-call (:id user) :modify-text-metadata)
           (mc/update "texts" {:_id (ObjectId. text-id)} {"$set" metadata})
           (response (:metadata (mc/find-map-by-id "texts" (ObjectId. text-id)))))
         (respond-json-404)))
@@ -183,6 +209,7 @@
     (try
       (if (can-access? user text-o)
         (do
+          (inc-api-call (:id user) :remove-text-metadata)
           (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)}
                      {"$unset" {(str "metadata." keyname) ""}})
           (respond {:msg (str "\"" keyname "\" was removed")}))
