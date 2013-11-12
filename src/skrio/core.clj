@@ -39,7 +39,7 @@
 
 
 (defn inc-api-call [user-id call]
-  (mc/update "users" {:_id user-id} {"$inc" {(str "metrics." call) 1}}))
+  (mc/update "users" {:_id user-id} {"$inc" {(str "metrics." (name call)) 1}}))
 
 (defn inc-text-access [text-id]
   (mc/update "texts" {:_id text-id} {"$inc" {:accessed 1}}))
