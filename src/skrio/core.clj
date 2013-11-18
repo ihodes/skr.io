@@ -124,6 +124,23 @@
     (catch Exception e))
   (response text-id))
 
+(defn- append-text
+  [text-id req]
+  (try
+    (if-let [user (:user req)]
+      (let [text-o (mc/find-one-as-map "texts" {:_id (ObjectId. text-id)
+                                                :user (:id user)})
+            appended-text (if (= (:content-type req)
+                                 "application/x-www-form-urlencoded")
+                            (get-in req [:body-params "text"])
+                            (:body req))]
+        (mc/update "texts" {:_id (ObjectId. text-id) :user (:id user)}
+                   {"$set" {:text (str (:text text-o) \newline appended-text)}})
+        (inc-api-call (:id user) :update-text))
+      (respond-json-401))
+    (catch Exception e))
+  (response text-id))
+
 (defn- make-text-public
   [text-id req]
   (try
@@ -278,6 +295,7 @@
   (context  "/api/v.1/text/:text-id" [text-id]
     (GET    "/"        [] (partial get-text text-id))
     (PUT    "/"        [] (partial update-text text-id))
+    (POST   "/append"  [] (partial append-text text-id))
     (POST   "/private" [] (partial make-text-private text-id))
     (POST   "/public"  [] (partial make-text-public text-id))
     (GET    "/meta"    [] (partial get-text-metadata    text-id))

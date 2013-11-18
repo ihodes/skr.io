@@ -187,3 +187,12 @@ Texts with Content-types application/json or application/xml may be queried with
 XPath queries may only select text (not attributes), and JSONPath queries may not use array slicing, or array indices, or script expressions. (All of these features are in the works).
 
 
+### Appending to Texts
+
+To **append** to a text
+
+    curl http://skr.io/api/v.1/text/<text-id> -dtext="some text to append"
+
+(Or, with any other content type, the entire POST body will be appended, as per usual.)
+
+This can be used for ad hoc logging or storage of other stream-type data.

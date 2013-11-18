@@ -37,19 +37,19 @@
 
     <div class="codez">
       <div class="explain col">To post a simple bit of plain text, you may just post it to the API.<br><br>It will return the ID of the text object. With it, you can rule the world.</div>
-      <pre class="example col">curl http://&lt;token&gt;:&lt;secret&gt;@skr.io/api/v.1/text -dtext="Here's our text."</pre>
+      <pre class="example col">curl http://&lt;token&gt;:&lt;secret&gt;@www.skr.io/api/v.1/text -dtext="Here's our text."</pre>
       <div style="clear: both; "></div>
 
       <p class="explain col">That's boring, though, so let's just POST some JSON instead.</p>
-      <pre class="example col">curl -H"content-type: application/json" http://&lt;token&gt;:&lt;secret&gt;@skr.io/api/v.1/text \
+      <pre class="example col">curl -H"content-type: application/json" http://&lt;token&gt;:&lt;secret&gt;@www.skr.io/api/v.1/text \
       -d"{\"apple\": \"pie\", \"turkey\": {\"and\": \"gravy\", \"numbers\": [1,2,3,4]}}"</pre>
       <p class= "explain col">Which returns, let's say, the id of <code>xyz123</code>. With this ID, we can do some cool things. First of all, let's make this text public, allowing others to see it who don't have our API key and secret.</p>
       
-      <pre class= "example col">curl -X POST http://&lt;token&gt;:&lt;secret&gt;@skr.io/api/v.1/text/xyz123/public</pre>
+      <pre class= "example col">curl -X POST http://&lt;token&gt;:&lt;secret&gt;@www.skr.io/api/v.1/text/xyz123/public</pre>
       <p class="explain col">Now just anyone can see this text at http://skr.io/text/xyz123. It's easy enough to make it private again, too, if you wish.</p>
       <p class="explain col">Let's query this tiny bit of JSON, with <a href="http://goessner.net/articles/JsonPath/">JSONPath</a>. If this were XML, you could query it with XPath instead.</p>
 
-      <pre class="example col">curl http://&lt;token&gt;:&lt;secret&gt;@skr.io/api/v.1/text/xyz123?q=$.apple</pre>
+      <pre class="example col">curl http://&lt;token&gt;:&lt;secret&gt;@www.skr.io/api/v.1/text/xyz123?q=$.apple</pre>
       <p class="explain col">...which should, naturally, return "pie". This queries can get quite complex, including predicates and other shenanigans. This is a very powerful way to query your text.</p>
       <p class="explain col">Even more information can be found in the <a href="http://skr.io/text/527ea6a8e4b090f819cc2968.html">API</a> documentation, and more features are being added regularly. The documenation itself was published by posting some text formatted with <a href="http://daringfireball.net/projects/markdown/">Markdown</a> with content-type <code>application/markdown</code>, and rendered so nicely by adding a <code>.html</code> extension to the URL (and, obviously, made public so that you can see it. You can check out some other formatting options by replacing the <code>.html</code> with a <code>.txt</code> or <code>.render</code> (or even no extension at all). Other content-types have other extensions which can be applied to them; c.f. the documenation. Again, feel free to email me at <a href="mailto:isaac@marion.io">isaac@marion.io</a> if you have any question, comments, or requests.</p></div>
   </body>
